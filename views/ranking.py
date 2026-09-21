@@ -13,10 +13,8 @@ from views.data import (
 
 
 def style_table(df_pandas):
-    return (
-        df_pandas.style
-        .apply(zebra_style, axis=1)
-        .map(category_cell_style, subset=["Catégorie"])
+    return df_pandas.style.apply(zebra_style, axis=1).map(
+        category_cell_style, subset=["Catégorie"]
     )
 
 
@@ -40,8 +38,7 @@ def render_ranking() -> None:
     df = get_dataframe()
 
     present = [
-        code for code in ("M", "F", "Mx")
-        if (df.get_column("Catégorie") == code).any()
+        code for code in ("M", "F", "Mx") if (df.get_column("Catégorie") == code).any()
     ]
     category = category_selector(present, key="ranking_category_filter")
 

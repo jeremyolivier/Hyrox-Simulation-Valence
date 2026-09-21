@@ -54,7 +54,9 @@ def _timeline_figure(rows, total):
             row["name"],
             format_seconds(row["seconds"]),
             f"{row['seconds'] / total * 100:.1f} %",
-            f"{format_seconds(row['seconds'])} /km" if row["type"] == "run" else "atelier",
+            f"{format_seconds(row['seconds'])} /km"
+            if row["type"] == "run"
+            else "atelier",
             format_seconds(row["start"] + row["seconds"]),
         ]
         for row in rows
@@ -148,9 +150,7 @@ def _splits_table(rows, total):
             "Temps": format_seconds(row["seconds"]),
             "% du total": f"{row['seconds'] / total * 100:.1f} %",
             "Allure": (
-                f"{format_seconds(row['seconds'])} /km"
-                if row["type"] == "run"
-                else ""
+                f"{format_seconds(row['seconds'])} /km" if row["type"] == "run" else ""
             ),
         }
         for row in rows

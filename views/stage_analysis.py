@@ -50,20 +50,17 @@ def _evolution_style(value: str) -> str:
 
 def _style_stage(df_pandas, highlighted: str | None):
     styler = (
-        df_pandas.style
-        .apply(zebra_style, axis=1)
+        df_pandas.style.apply(zebra_style, axis=1)
         .map(category_cell_style, subset=["Catégorie"])
         .map(_evolution_style, subset=["Évol. générale", "Évol. catégorie"])
     )
 
     if highlighted:
+
         def highlight_row(row):
             if row.get("Équipe") == highlighted:
                 return [
-                    (
-                        "background-color: rgba(250, 204, 21, 0.35); "
-                        "font-weight: 700;"
-                    )
+                    ("background-color: rgba(250, 204, 21, 0.35); font-weight: 700;")
                 ] * len(row)
 
             return [""] * len(row)
@@ -84,7 +81,8 @@ def render_stage_analysis() -> None:
         return
 
     present = [
-        code for code in ("M", "F", "Mx")
+        code
+        for code in ("M", "F", "Mx")
         if any(team.gender == code for team in ranking.ranking)
     ]
     category = category_selector(present, key="stage_category_filter")
@@ -124,9 +122,7 @@ def render_stage_analysis() -> None:
                 "Rang": row.stage_rank,
                 "Évol. générale": _evolution(previous_global, row.stage_rank),
                 "Rang catégorie": row.category_rank,
-                "Évol. catégorie": _evolution(
-                    previous_category, row.category_rank
-                ),
+                "Évol. catégorie": _evolution(previous_category, row.category_rank),
                 "Équipe": row.team,
                 "Catégorie": row.gender,
                 "Temps cumulé": row.cumulative_time,
@@ -214,9 +210,7 @@ def render_stage_analysis() -> None:
     else:
         values_by_category = {
             code: [
-                row.cumulative_seconds
-                for row in full_standings
-                if row.gender == code
+                row.cumulative_seconds for row in full_standings if row.gender == code
             ]
             for code in ("M", "F", "Mx")
         }
@@ -229,9 +223,7 @@ def render_stage_analysis() -> None:
             else None
         )
         highlight = (
-            (focus.team, focus.cumulative_seconds)
-            if focus is not None
-            else None
+            (focus.team, focus.cumulative_seconds) if focus is not None else None
         )
         heading = "Distribution des temps cumulés à cette étape"
         x_title = "Temps cumulé"

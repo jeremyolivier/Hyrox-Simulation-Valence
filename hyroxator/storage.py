@@ -18,8 +18,7 @@ def load_ranking(path: Path = DATA_PATH) -> TeamsRanking:
     """Load the ranking from disk (no network call)."""
     if not path.exists():
         raise FileNotFoundError(
-            f"Data file not found: {path}\n"
-            "Run the download first: python download.py"
+            f"Data file not found: {path}\nRun the download first: python download.py"
         )
 
     return TeamsRanking.model_validate_json(

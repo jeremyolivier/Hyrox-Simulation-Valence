@@ -99,16 +99,13 @@ async def get_station_result(pid: int) -> list[StationResult]:
 
 
 def build_events(
-        runs: list[RunResult],
-        stations: list[StationResult],
+    runs: list[RunResult],
+    stations: list[StationResult],
 ) -> list[EventResult]:
     events = []
 
     runs_by_number = {run.number: run for run in runs}
-    stations_by_number = {
-        station.number: station
-        for station in stations
-    }
+    stations_by_number = {station.number: station for station in stations}
 
     for number in range(1, 9):
         run = runs_by_number.get(number)

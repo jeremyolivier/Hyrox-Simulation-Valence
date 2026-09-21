@@ -11,11 +11,11 @@ COLORS = {
 
 
 def _rank_chart(
-        stages: list[int],
-        global_ranks: list[int],
-        category_ranks: list[int],
-        stage_names: list[str],
-        all_stages: list[int],
+    stages: list[int],
+    global_ranks: list[int],
+    category_ranks: list[int],
+    stage_names: list[str],
+    all_stages: list[int],
 ) -> go.Figure:
     fig = go.Figure()
 
@@ -40,10 +40,7 @@ def _rank_chart(
                 "color": COLORS["global"],
             },
             customdata=stage_names,
-            hovertemplate=(
-                "Étape %{x} · %{customdata}"
-                "<br>Rang %{y}<extra></extra>"
-            ),
+            hovertemplate=("Étape %{x} · %{customdata}<br>Rang %{y}<extra></extra>"),
             name="Classement général",
         )
     )
@@ -88,10 +85,7 @@ def _rank_chart(
                 "color": COLORS["category"],
             },
             customdata=stage_names,
-            hovertemplate=(
-                "Étape %{x} · %{customdata}"
-                "<br>Rang %{y}<extra></extra>"
-            ),
+            hovertemplate=("Étape %{x} · %{customdata}<br>Rang %{y}<extra></extra>"),
             name="Classement par catégorie",
         )
     )
@@ -132,10 +126,7 @@ def _rank_chart(
                     go.Scatter(
                         x=current_stages,
                         y=current_global_ranks,
-                        text=[
-                            str(rank)
-                            for rank in current_global_ranks
-                        ],
+                        text=[str(rank) for rank in current_global_ranks],
                         customdata=current_stage_names,
                     ),
                     go.Scatter(
@@ -145,10 +136,7 @@ def _rank_chart(
                     go.Scatter(
                         x=current_stages,
                         y=current_category_ranks,
-                        text=[
-                            str(rank)
-                            for rank in current_category_ranks
-                        ],
+                        text=[str(rank) for rank in current_category_ranks],
                         customdata=current_stage_names,
                     ),
                     go.Scatter(
@@ -200,7 +188,7 @@ def _rank_chart(
         range=[
             all_stages[0] - 0.5,
             all_stages[-1] + 0.5,
-            ],
+        ],
         tickmode="array",
         tickvals=all_stages,
         showgrid=False,
@@ -259,19 +247,14 @@ def render_team_progression() -> None:
 
     if not team_name:
         st.info(
-            "Sélectionne une équipe ci-dessus pour voir son évolution "
-            "au classement."
+            "Sélectionne une équipe ci-dessus pour voir son évolution au classement."
         )
         return
 
     ranking = get_ranking()
 
     team = next(
-        (
-            item
-            for item in ranking.ranking
-            if item.team == team_name
-        ),
+        (item for item in ranking.ranking if item.team == team_name),
         None,
     )
 
@@ -283,31 +266,16 @@ def render_team_progression() -> None:
     progression = ranking.team_progression(team.pid)
 
     if not progression:
-        st.info(
-            f"**{team_name}** n'a pas de classement par étape "
-            "(splits incomplets)."
-        )
+        st.info(f"**{team_name}** n'a pas de classement par étape (splits incomplets).")
         return
 
-    all_stages = [
-        item[0]
-        for item in progression
-    ]
+    all_stages = [item[0] for item in progression]
 
-    stage_names = [
-        labels[item[0] - 1]
-        for item in progression
-    ]
+    stage_names = [labels[item[0] - 1] for item in progression]
 
-    global_ranks = [
-        item[1]
-        for item in progression
-    ]
+    global_ranks = [item[1] for item in progression]
 
-    category_ranks = [
-        item[2]
-        for item in progression
-    ]
+    category_ranks = [item[2] for item in progression]
 
     # Start by displaying the complete race.
     stages = all_stages

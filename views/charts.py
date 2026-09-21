@@ -15,19 +15,16 @@ def _hms(total) -> str:
 
 
 def kde_by_category(
-        values_by_category: dict,
-        highlight: tuple[str, int] | None = None,
-        x_title: str = "Temps",
+    values_by_category: dict,
+    highlight: tuple[str, int] | None = None,
+    x_title: str = "Temps",
 ) -> go.Figure:
     """KDE des temps par catégorie (M/F/Mx), rug et moyennes verticales.
 
     Courbe, rug et moyenne d'une catégorie partagent un ``legendgroup`` : un
     clic sur la légende les masque/affiche ensemble.
     """
-    codes = [
-        code for code in CATEGORY_LABELS
-        if len(values_by_category.get(code, []))
-    ]
+    codes = [code for code in CATEGORY_LABELS if len(values_by_category.get(code, []))]
 
     all_values = (
         np.concatenate([np.asarray(values_by_category[code]) for code in codes])

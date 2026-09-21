@@ -27,7 +27,7 @@ CATEGORY_COLORS = {
 
 def hex_to_rgba(hex_color: str, alpha: float) -> str:
     h = hex_color.lstrip("#")
-    red, green, blue = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    red, green, blue = (int(h[i : i + 2], 16) for i in (0, 2, 4))
 
     return f"rgba({red}, {green}, {blue}, {alpha})"
 
@@ -100,13 +100,7 @@ def gender_breakdown() -> dict[str, int]:
 
 
 def team_names() -> list[str]:
-    return (
-        get_dataframe()
-        .get_column("Équipe")
-        .unique()
-        .sort()
-        .to_list()
-    )
+    return get_dataframe().get_column("Équipe").unique().sort().to_list()
 
 
 def highlighted_team() -> str | None:

@@ -7,7 +7,13 @@ STATIONS = [
     ("SkiErg", "1 000 m", "", "", ""),
     ("Sled Push", "50 m", "152 kg", "102 kg", "152 kg"),
     ("Sled Pull", "50 m", "103 kg", "78 kg", "103 kg"),
-    ("Burpee Broad Jumps", "80 m", "Poids du corps", "Poids du corps", "Poids du corps"),
+    (
+        "Burpee Broad Jumps",
+        "80 m",
+        "Poids du corps",
+        "Poids du corps",
+        "Poids du corps",
+    ),
     ("Rowing", "1 000 m", "", "", ""),
     ("Farmers Carry", "200 m", "2 × 24 kg", "2 × 16 kg", "2 × 24 kg"),
     ("Sandbag Lunges", "100 m", "20 kg", "10 kg", "20 kg"),
@@ -42,9 +48,7 @@ def _style_standards(df_pandas):
         if not category_color:
             return [""] * len(column)
 
-        return [
-            f"background-color: {hex_to_rgba(category_color, 0.14)};"
-        ] * len(column)
+        return [f"background-color: {hex_to_rgba(category_color, 0.14)};"] * len(column)
 
     return df_pandas.style.apply(column_style, axis=0)
 

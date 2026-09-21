@@ -12,8 +12,7 @@ from views.data import (
 )
 
 CATEGORIES = {
-    code: (CATEGORY_LABELS[code], CATEGORY_COLORS[code])
-    for code in CATEGORY_LABELS
+    code: (CATEGORY_LABELS[code], CATEGORY_COLORS[code]) for code in CATEGORY_LABELS
 }
 
 
@@ -30,12 +29,8 @@ def render_distribution() -> None:
     df = get_dataframe()
 
     parsed_df = (
-        df.filter(
-            pl.col("Temps Final").is_not_null() & (pl.col("Temps Final") != "")
-        )
-        .with_columns(
-            pl.col("Temps Final").str.split(":").alias("time_parts")
-        )
+        df.filter(pl.col("Temps Final").is_not_null() & (pl.col("Temps Final") != ""))
+        .with_columns(pl.col("Temps Final").str.split(":").alias("time_parts"))
         .with_columns(
             pl.when(pl.col("time_parts").list.len() == 2)
             .then(
@@ -91,9 +86,9 @@ def render_distribution() -> None:
 
     highlight = None
     if team_in_subset:
-        selected_team_time = subset.filter(
-            pl.col("Équipe") == selected_team
-        ).row(0, named=True)["total_seconds"]
+        selected_team_time = subset.filter(pl.col("Équipe") == selected_team).row(
+            0, named=True
+        )["total_seconds"]
         highlight = (selected_team, selected_team_time)
 
     st.plotly_chart(
@@ -104,9 +99,7 @@ def render_distribution() -> None:
     )
 
     if team_in_subset:
-        team_row = subset.filter(
-            pl.col("Équipe") == selected_team
-        ).row(0, named=True)
+        team_row = subset.filter(pl.col("Équipe") == selected_team).row(0, named=True)
 
         team_category = team_row["Catégorie"]
 

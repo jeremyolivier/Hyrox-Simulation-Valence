@@ -135,17 +135,14 @@ class TeamsRanking(BaseModel):
                 else:
                     valid_items.append(TeamResult.model_validate(item))
             except (
-                    ValidationError,
-                    IndexError,
-                    KeyError,
-                    TypeError,
-                    ValueError,
+                ValidationError,
+                IndexError,
+                KeyError,
+                TypeError,
+                ValueError,
             ) as e:
                 errors_count += 1
-                print(
-                    f"[DEBUG Pydantic] Validation failed: {e} | "
-                    f"Item: {item}"
-                )
+                print(f"[DEBUG Pydantic] Validation failed: {e} | Item: {item}")
 
         print(
             f"\n[DEBUG Pydantic] Valid teams: {len(valid_items)} / "
@@ -155,14 +152,11 @@ class TeamsRanking(BaseModel):
         return valid_items
 
     def by_gender(
-            self,
-            gender: Literal["M", "F", "Mx"],
-            sort: bool = True,
+        self,
+        gender: Literal["M", "F", "Mx"],
+        sort: bool = True,
     ) -> list[TeamResult]:
-        filtered = [
-            team for team in self.ranking
-            if team.gender == gender
-        ]
+        filtered = [team for team in self.ranking if team.gender == gender]
 
         if sort:
             return sorted(
@@ -205,9 +199,7 @@ class TeamsRanking(BaseModel):
         for stage in range(1, len(self.stage_labels()) + 1):
             for row in self.ranking_at_stage(stage):
                 if row.pid == pid:
-                    progression.append(
-                        (stage, row.stage_rank, row.category_rank)
-                    )
+                    progression.append((stage, row.stage_rank, row.category_rank))
                     break
 
         return progression
@@ -222,10 +214,7 @@ class TeamsRanking(BaseModel):
         if reference is None:
             return []
 
-        return [
-            event.name
-            for event in sorted(reference.events, key=lambda e: e.order)
-        ]
+        return [event.name for event in sorted(reference.events, key=lambda e: e.order)]
 
     def ranking_at_stage(self, stage: int) -> list[StageStanding]:
         cumulated: list[tuple[TeamResult, int]] = []
