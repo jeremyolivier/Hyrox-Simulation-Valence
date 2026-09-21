@@ -1,7 +1,12 @@
 import streamlit as st
 
 from views.distribution import render_distribution
+from views.intro import render_intro
 from views.ranking import render_ranking
+from views.stage_analysis import render_stage_analysis
+from views.standards import render_standards
+from views.team_progression import render_team_progression
+from views.team_timeline import render_team_timeline
 
 st.set_page_config(
     page_title="Classement Hyrox Simulation Valence 2026",
@@ -9,36 +14,71 @@ st.set_page_config(
     layout="wide",
 )
 
-SECTIONS = [
-    (":material/leaderboard:", "Classement", "classement", render_ranking),
+GROUPS = [
     (
-        ":material/bar_chart:",
-        "Distribution des temps",
-        "distribution-des-temps",
-        render_distribution,
+        "Le format",
+        [
+            (
+                ":material/fitness_center:",
+                "Déroulé d'un Hyrox - Open",
+                "deroule",
+                render_standards,
+            ),
+        ],
+    ),
+    (
+        "Analyse générale",
+        [
+            (":material/leaderboard:", "Classement", "classement", render_ranking),
+            (
+                ":material/bar_chart:",
+                "Distribution des temps",
+                "distribution",
+                render_distribution,
+            ),
+        ],
+    ),
+    (
+        "Analyse par étapes",
+        [
+            (
+                ":material/trending_up:",
+                "Classement & distribution par étape",
+                "par-etapes",
+                render_stage_analysis,
+            ),
+        ],
+    ),
+    (
+        "Focus équipe",
+        [
+            (
+                ":material/show_chart:",
+                "Évolution au classement",
+                "evolution-classement",
+                render_team_progression,
+            ),
+            (
+                ":material/timeline:",
+                "Splits de l'équipe",
+                "splits-equipe",
+                render_team_timeline,
+            ),
+        ],
     ),
 ]
 
 with st.sidebar:
-    st.markdown("### Sections")
-    for icon, title, anchor, _ in SECTIONS:
-        st.markdown(f"[{icon} {title}](#{anchor})")
+    for group_name, sections in GROUPS:
+        st.markdown(f"**{group_name}**")
+        for icon, title, anchor, _ in sections:
+            st.markdown(f"[{icon} {title}](#{anchor})")
 
-st.title("Classement - Hyrox Simulation Valence - 20/09/2026")
+render_intro()
 
-st.markdown(
-    """
-    Application non-officielle pour visualiser quelques données sur la course
-    Hyrox Simulation Valence 2026.
-    """
-)
-
-st.info(
-    "**Source des données :** Retrouvez le classement officiel complet sur "
-    "[RaceResult](https://my.raceresult.com/405157/#0_350C18)."
-)
-
-for icon, title, anchor, render in SECTIONS:
+for group_name, sections in GROUPS:
     st.divider()
-    st.subheader(f"{icon} {title}", anchor=anchor)
-    render()
+    st.header(group_name)
+    for _icon, title, anchor, render in sections:
+        st.subheader(title, anchor=anchor)
+        render()

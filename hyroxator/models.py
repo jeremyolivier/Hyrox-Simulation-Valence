@@ -12,6 +12,31 @@ def _clean_str(val: str) -> str:
     return clean.strip()
 
 
+def _time_to_seconds(value: str) -> int | None:
+    parts = value.split(":")
+
+    if not value or not all(part.isdigit() for part in parts):
+        return None
+
+    if len(parts) == 2:
+        return int(parts[0]) * 60 + int(parts[1])
+
+    if len(parts) == 3:
+        return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+
+    return None
+
+
+def _format_seconds(total: int) -> str:
+    hours, remainder = divmod(total, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    if hours:
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+    return f"{minutes:02d}:{seconds:02d}"
+
+
 class RunResult(BaseModel):
     number: int
     time: str
@@ -82,6 +107,18 @@ class TeamResult(BaseModel):
         }
 
 
+class StageStanding(BaseModel):
+    stage_rank: int
+    category_rank: int
+    pid: int
+    bib: int
+    team: str
+    gender: Literal["M", "F", "Mx"]
+    cumulative_seconds: int
+    cumulative_time: str
+    gap: str
+
+
 class TeamsRanking(BaseModel):
     ranking: list[TeamResult]
 
@@ -140,3 +177,99 @@ class TeamsRanking(BaseModel):
             self.ranking,
             key=lambda team: team.global_rank,
         )
+
+    def stage_splits(self, stage: int) -> list[tuple[str, str, int]]:
+        splits = []
+
+        for team in self.ranking:
+            event = next(
+                (item for item in team.events if item.order == stage),
+                None,
+            )
+
+            if event is None:
+                continue
+
+            seconds = _time_to_seconds(event.time)
+
+            if seconds is None:
+                continue
+
+            splits.append((team.team, team.gender, seconds))
+
+        return splits
+
+    def team_progression(self, pid: int) -> list[tuple[int, int, int]]:
+        progression: list[tuple[int, int, int]] = []
+
+        for stage in range(1, len(self.stage_labels()) + 1):
+            for row in self.ranking_at_stage(stage):
+                if row.pid == pid:
+                    progression.append(
+                        (stage, row.stage_rank, row.category_rank)
+                    )
+                    break
+
+        return progression
+
+    def stage_labels(self) -> list[str]:
+        reference = max(
+            self.ranking,
+            key=lambda team: len(team.events),
+            default=None,
+        )
+
+        if reference is None:
+            return []
+
+        return [
+            event.name
+            for event in sorted(reference.events, key=lambda e: e.order)
+        ]
+
+    def ranking_at_stage(self, stage: int) -> list[StageStanding]:
+        cumulated: list[tuple[TeamResult, int]] = []
+
+        for team in self.ranking:
+            events = [event for event in team.events if event.order <= stage]
+
+            if len(events) < stage:
+                continue
+
+            seconds = [_time_to_seconds(event.time) for event in events]
+
+            if any(value is None for value in seconds):
+                continue
+
+            cumulated.append(
+                (team, sum(value for value in seconds if value is not None))
+            )
+
+        cumulated.sort(key=lambda item: item[1])
+
+        if not cumulated:
+            return []
+
+        leader_seconds = cumulated[0][1]
+        category_counts: dict[str, int] = {}
+        standings: list[StageStanding] = []
+
+        for index, (team, total) in enumerate(cumulated):
+            category_counts[team.gender] = category_counts.get(team.gender, 0) + 1
+            gap = total - leader_seconds
+
+            standings.append(
+                StageStanding(
+                    stage_rank=index + 1,
+                    category_rank=category_counts[team.gender],
+                    pid=team.pid,
+                    bib=team.bib,
+                    team=team.team,
+                    gender=team.gender,
+                    cumulative_seconds=total,
+                    cumulative_time=_format_seconds(total),
+                    gap="" if gap == 0 else f"+{_format_seconds(gap)}",
+                )
+            )
+
+        return standings

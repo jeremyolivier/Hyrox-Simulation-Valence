@@ -1,15 +1,19 @@
 import numpy as np
-import plotly.graph_objects as go
 import polars as pl
 import streamlit as st
-from scipy.stats import gaussian_kde
 
-from views.data import get_dataframe
+from views.charts import kde_by_category
+from views.data import (
+    CATEGORY_COLORS,
+    CATEGORY_LABELS,
+    get_dataframe,
+    highlighted_team,
+    team_selector,
+)
 
 CATEGORIES = {
-    "M": ("Hommes (M)", "#3B82F6"),
-    "F": ("Femmes (F)", "#EC4899"),
-    "Mx": ("Mixte (Mx)", "#F59E0B"),
+    code: (CATEGORY_LABELS[code], CATEGORY_COLORS[code])
+    for code in CATEGORY_LABELS
 }
 
 
@@ -20,15 +24,9 @@ def format_duration(seconds: int) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def hex_to_rgba(hex_color: str, alpha: float) -> str:
-    h = hex_color.lstrip("#")
-    red, green, blue = (int(h[i:i + 2], 16) for i in (0, 2, 4))
-
-    return f"rgba({red}, {green}, {blue}, {alpha})"
-
-
-@st.fragment
 def render_distribution() -> None:
+    team_selector("distribution")
+
     df = get_dataframe()
 
     parsed_df = (
@@ -60,10 +58,6 @@ def render_distribution() -> None:
 
     subset = parsed_df
 
-    st.caption(
-        "Clique une catégorie dans la légende pour la masquer ou l'afficher."
-    )
-
     stats_rows = [
         {
             "Catégorie": CATEGORIES[cat][0],
@@ -84,143 +78,31 @@ def render_distribution() -> None:
         width="stretch",
     )
 
-    team_options = ["Aucune"] + (
-        subset
-        .select("Équipe")
-        .unique()
-        .sort("Équipe")
-        .get_column("Équipe")
-        .to_list()
+    selected_team = highlighted_team()
+    team_in_subset = (
+        selected_team is not None
+        and subset.filter(pl.col("Équipe") == selected_team).height > 0
     )
 
-    selected_team = st.selectbox(
-        "Mettre une équipe en évidence :",
-        team_options,
-        key="chart_selected_team",
-    )
-
-    plottable = [
-        cat
+    values_by_category = {
+        cat: subset.filter(pl.col("Catégorie") == cat)["total_seconds"].to_numpy()
         for cat in selected_cats
-        for series in [
-            subset.filter(pl.col("Catégorie") == cat)["total_seconds"]
-        ]
-        if series.len() >= 2 and series.n_unique() > 1
-    ]
+    }
 
-    all_times = subset["total_seconds"].to_numpy()
-    x_grid = np.linspace(all_times.min(), all_times.max(), 200)
-    x_labels = [format_duration(value) for value in x_grid]
-
-    fig = go.Figure()
-
-    densities = []
-
-    for cat in plottable:
-        data = subset.filter(
-            pl.col("Catégorie") == cat
-        )["total_seconds"].to_numpy()
-
-        density = gaussian_kde(data)(x_grid)
-        densities.append(density)
-
-        label, color = CATEGORIES[cat]
-
-        fig.add_scatter(
-            x=x_grid,
-            y=density,
-            name=label,
-            mode="lines",
-            line={"color": color, "width": 2},
-            fill="tozeroy",
-            fillcolor=hex_to_rgba(color, 0.18),
-            customdata=x_labels,
-            hovertemplate=f"<b>{label}</b><br>%{{customdata}}<extra></extra>",
-        )
-
-    max_density = max((density.max() for density in densities), default=1.0)
-    rug_step = max_density * 0.06
-
-    for index, cat in enumerate(plottable):
-        data = subset.filter(
-            pl.col("Catégorie") == cat
-        )["total_seconds"].to_numpy()
-
-        _, color = CATEGORIES[cat]
-
-        fig.add_scatter(
-            x=data,
-            y=np.full(len(data), -rug_step * (index + 1)),
-            mode="markers",
-            marker={"symbol": "line-ns-open", "color": color, "size": 8},
-            showlegend=False,
-            hoverinfo="skip",
-        )
-
-    if selected_team != "Aucune":
+    highlight = None
+    if team_in_subset:
         selected_team_time = subset.filter(
             pl.col("Équipe") == selected_team
         ).row(0, named=True)["total_seconds"]
+        highlight = (selected_team, selected_team_time)
 
-        fig.add_vline(
-            x=selected_team_time,
-            line_color="#7C3AED",
-            line_width=2.5,
-            annotation_text=(
-                f"{selected_team} · {format_duration(selected_team_time)}"
-            ),
-            annotation_position="top left",
-            annotation_font={"color": "#7C3AED", "size": 12},
-        )
-
-    tick_values = np.linspace(all_times.min(), all_times.max(), num=8)
-
-    fig.update_xaxes(
-        tickmode="array",
-        tickvals=tick_values,
-        ticktext=[format_duration(value) for value in tick_values],
-        showgrid=False,
-        ticks="outside",
-        tickcolor="rgba(0, 0, 0, 0.15)",
+    st.plotly_chart(
+        kde_by_category(values_by_category, highlight, "Temps final"),
+        width="stretch",
+        key="distribution_general",
     )
 
-    fig.update_yaxes(
-        showticklabels=False,
-        showgrid=False,
-        zeroline=True,
-        zerolinecolor="rgba(0, 0, 0, 0.15)",
-        range=[-rug_step * (len(plottable) + 1), max_density * 1.12],
-    )
-
-    fig.update_layout(
-        xaxis_title="Temps final",
-        yaxis_title="Densité d'équipes",
-        height=480,
-        margin={"l": 20, "r": 20, "t": 60, "b": 20},
-        plot_bgcolor="rgba(0, 0, 0, 0)",
-        paper_bgcolor="rgba(0, 0, 0, 0)",
-        font={
-            "family": "system-ui, -apple-system, sans-serif",
-            "color": "#1F2937",
-        },
-        hoverlabel={
-            "bgcolor": "white",
-            "bordercolor": "rgba(0, 0, 0, 0.1)",
-            "font_size": 13,
-        },
-        legend={
-            "title": "Catégorie",
-            "orientation": "h",
-            "yanchor": "bottom",
-            "y": 1.02,
-            "xanchor": "left",
-            "x": 0,
-        },
-    )
-
-    st.plotly_chart(fig, width="stretch")
-
-    if selected_team != "Aucune":
+    if team_in_subset:
         team_row = subset.filter(
             pl.col("Équipe") == selected_team
         ).row(0, named=True)

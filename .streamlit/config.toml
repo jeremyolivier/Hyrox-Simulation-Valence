@@ -1,3 +1,14 @@
 [theme]
-# Police uniforme pour toute l'app ; les graphes Plotly utilisent la même pile.
-font = "system-ui, -apple-system, sans-serif"
+base = "light"
+primaryColor = "#111111"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F5F4"
+textColor = "#0A0A0A"
+borderColor = "#E7E5E4"
+showWidgetBorder = true
+baseRadius = "10px"
+baseFontSize = 15
+font = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "'Bricolage Grotesque':https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
+headingFontWeights = [700, 700, 600, 600, 600, 600]
+metricValueFontWeight = 700

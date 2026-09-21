@@ -1,112 +1,77 @@
 import polars as pl
 import streamlit as st
 
-from views.data import VISIBLE_COLUMNS, get_dataframe
+from views.data import (
+    VISIBLE_COLUMNS,
+    category_cell_style,
+    category_selector,
+    get_dataframe,
+    highlighted_team,
+    team_selector,
+    zebra_style,
+)
 
 
 def style_table(df_pandas):
-    def highlight_row(row):
-        rank = row.get("Rang Général")
-
-        if rank == 1:
-            return [
-                "background-color: rgba(255, 215, 0, 0.25); font-weight: bold;"
-            ] * len(row)
-
-        if rank == 2:
-            return [
-                "background-color: rgba(192, 192, 192, 0.25); font-weight: bold;"
-            ] * len(row)
-
-        if rank == 3:
-            return [
-                "background-color: rgba(205, 127, 50, 0.25); font-weight: bold;"
-            ] * len(row)
-
-        if row.name % 2 == 1:
-            return ["background-color: rgba(240, 242, 246, 0.15);"] * len(row)
-
-        return [""] * len(row)
-
-    return df_pandas.style.apply(highlight_row, axis=1)
+    return (
+        df_pandas.style
+        .apply(zebra_style, axis=1)
+        .map(category_cell_style, subset=["Catégorie"])
+    )
 
 
-@st.fragment
+def _column_config():
+    return {
+        "Rang Général": st.column_config.NumberColumn("Rang Général", width="small"),
+        "Rang Catégorie": st.column_config.NumberColumn(
+            "Rang Catégorie",
+            width="small",
+        ),
+        "Catégorie": st.column_config.TextColumn("Catégorie", width="small"),
+        "Équipe": st.column_config.TextColumn("Équipe", width="large"),
+        "Temps Final": st.column_config.TextColumn("Temps Final", width="medium"),
+        "Écart": st.column_config.TextColumn("Écart", width="small"),
+    }
+
+
 def render_ranking() -> None:
+    team_selector("classement")
+
     df = get_dataframe()
 
-    col1, col2 = st.columns(2)
-
-    with col1:
-        filter_column = st.selectbox(
-            "Filtrer par :",
-            ["Aucun filtre", "Catégorie"],
-            key="ranking_filter_column",
-        )
+    present = [
+        code for code in ("M", "F", "Mx")
+        if (df.get_column("Catégorie") == code).any()
+    ]
+    category = category_selector(present, key="ranking_category_filter")
 
     filtered_df = df
-
-    with col2:
-        if filter_column != "Aucun filtre":
-            unique_values = (
-                df.get_column(filter_column)
-                .cast(pl.String)
-                .unique()
-                .sort()
-                .to_list()
-            )
-
-            selected_value = st.selectbox(
-                f"Choisir la valeur ({filter_column}) :",
-                options=["Tous"] + unique_values,
-                key="ranking_selected_value",
-            )
-
-            if selected_value != "Tous":
-                filtered_df = df.filter(
-                    pl.col(filter_column).cast(pl.String) == selected_value
-                )
+    if category and category != "Toutes":
+        filtered_df = df.filter(pl.col("Catégorie") == category)
 
     st.write(f"**{len(filtered_df)}** équipes affichées")
 
-    display_df = filtered_df.select(VISIBLE_COLUMNS)
-    styled_df = style_table(display_df.to_pandas())
-
     st.dataframe(
-        styled_df,
+        style_table(filtered_df.select(VISIBLE_COLUMNS).to_pandas()),
         width="stretch",
         hide_index=True,
-        column_config={
-            "Rang Général": st.column_config.NumberColumn(
-                "Rang Général",
-                width="small",
-            ),
-            "Rang Catégorie": st.column_config.NumberColumn(
-                "Rang Catégorie",
-                width="small",
-            ),
-            "Dossard": st.column_config.NumberColumn(
-                "Dossard",
-                width="small",
-            ),
-            "Catégorie": st.column_config.TextColumn(
-                "Catégorie",
-                width="small",
-            ),
-            "Équipe": st.column_config.TextColumn(
-                "Équipe",
-                width="large",
-            ),
-            "Temps Final": st.column_config.TextColumn(
-                "Temps Final",
-                width="medium",
-            ),
-            "Écart": st.column_config.TextColumn(
-                "Écart",
-                width="small",
-            ),
-        },
+        column_config=_column_config(),
     )
+
+    highlighted = highlighted_team()
+    if highlighted:
+        focus = df.filter(pl.col("Équipe") == highlighted).select(VISIBLE_COLUMNS)
+
+        if focus.height:
+            st.markdown(f"**Équipe mise en avant : {highlighted}**")
+            st.dataframe(
+                style_table(focus.to_pandas()),
+                width="stretch",
+                hide_index=True,
+                column_config=_column_config(),
+            )
+        else:
+            st.caption(f"{highlighted} n'apparaît pas dans ce classement.")
 
     st.download_button(
         label="Exporter en CSV",

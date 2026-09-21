@@ -1,6 +1,7 @@
 from hyroxator.models import (
     EventResult,
     RunResult,
+    StageStanding,
     StationResult,
     TeamResult,
     TeamsRanking,
@@ -12,6 +13,7 @@ __all__ = [
     "DATA_PATH",
     "EventResult",
     "RunResult",
+    "StageStanding",
     "StationResult",
     "TeamResult",
     "TeamsRanking",
