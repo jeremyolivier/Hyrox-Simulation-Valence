@@ -4,6 +4,8 @@ from scipy.stats import gaussian_kde
 
 from views.data import CATEGORY_COLORS, CATEGORY_LABELS, hex_to_rgba
 
+CHART_CONFIG = {"displayModeBar": False, "scrollZoom": False}
+
 
 def _hms(total) -> str:
     hours, remainder = divmod(int(total), 3600)

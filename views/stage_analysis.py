@@ -1,7 +1,7 @@
 import polars as pl
 import streamlit as st
 
-from views.charts import kde_by_category
+from views.charts import CHART_CONFIG, kde_by_category
 from views.data import (
     category_cell_style,
     category_selector,
@@ -241,4 +241,5 @@ def render_stage_analysis() -> None:
         kde_by_category(values_by_category, highlight, x_title),
         width="stretch",
         key="distribution_stage",
+        config=CHART_CONFIG,
     )

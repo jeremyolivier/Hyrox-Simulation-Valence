@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 import streamlit as st
 
+from views.charts import CHART_CONFIG
 from views.data import get_ranking, highlighted_team, team_selector
 
 COLORS = {
@@ -322,7 +323,5 @@ def render_team_progression() -> None:
     st.plotly_chart(
         fig,
         width="stretch",
-        config={
-            "displayModeBar": False,
-        },
+        config=CHART_CONFIG,
     )

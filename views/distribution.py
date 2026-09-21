@@ -2,7 +2,7 @@ import numpy as np
 import polars as pl
 import streamlit as st
 
-from views.charts import kde_by_category
+from views.charts import CHART_CONFIG, kde_by_category
 from views.data import (
     CATEGORY_COLORS,
     CATEGORY_LABELS,
@@ -100,6 +100,7 @@ def render_distribution() -> None:
         kde_by_category(values_by_category, highlight, "Temps final"),
         width="stretch",
         key="distribution_general",
+        config=CHART_CONFIG,
     )
 
     if team_in_subset:

@@ -3,6 +3,7 @@ import polars as pl
 import streamlit as st
 
 from hyroxator.models import _time_to_seconds
+from views.charts import CHART_CONFIG
 from views.data import (
     format_seconds,
     get_ranking,
@@ -195,7 +196,11 @@ def render_team_timeline() -> None:
         "ateliers en couleur · survole un segment pour le détail."
     )
 
-    st.plotly_chart(_timeline_figure(rows, total), width="stretch")
+    st.plotly_chart(
+        _timeline_figure(rows, total),
+        width="stretch",
+        config=CHART_CONFIG,
+    )
 
     st.dataframe(
         _splits_table(rows, total),
