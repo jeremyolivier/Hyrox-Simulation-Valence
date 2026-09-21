@@ -192,6 +192,7 @@ def _rank_chart(
         tickformat="d",
         showgrid=True,
         gridcolor="rgba(0, 0, 0, 0.06)",
+        fixedrange=True,
     )
 
     fig.update_xaxes(
@@ -203,9 +204,11 @@ def _rank_chart(
         tickmode="array",
         tickvals=all_stages,
         showgrid=False,
+        fixedrange=True,
     )
 
     fig.update_layout(
+        dragmode=False,
         height=420,
         margin={
             "l": 20,

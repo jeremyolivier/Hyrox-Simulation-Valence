@@ -115,10 +115,12 @@ def _timeline_figure(rows, total):
         showgrid=True,
         gridcolor="rgba(0, 0, 0, 0.06)",
         range=[0, total],
+        fixedrange=True,
     )
-    fig.update_yaxes(showticklabels=False)
+    fig.update_yaxes(showticklabels=False, fixedrange=True)
 
     fig.update_layout(
+        dragmode=False,
         height=240,
         margin={"l": 20, "r": 20, "t": 30, "b": 30},
         plot_bgcolor="rgba(0, 0, 0, 0)",

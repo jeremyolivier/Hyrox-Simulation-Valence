@@ -116,6 +116,7 @@ def kde_by_category(
         showgrid=False,
         ticks="outside",
         tickcolor="rgba(0, 0, 0, 0.15)",
+        fixedrange=True,
     )
 
     fig.update_yaxes(
@@ -124,10 +125,12 @@ def kde_by_category(
         zeroline=True,
         zerolinecolor="rgba(0, 0, 0, 0.15)",
         range=[-rug_step * (len(plottable) + 1), max_density * 1.28],
+        fixedrange=True,
     )
 
     fig.update_layout(
         uirevision="categories",
+        dragmode=False,
         xaxis_title=x_title,
         yaxis_title="Densité d'équipes",
         height=480,
