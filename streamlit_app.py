@@ -1,5 +1,6 @@
 import streamlit as st
 
+from views.data import startup_team_dialog
 from views.distribution import render_distribution
 from views.intro import render_intro
 from views.ranking import render_ranking
@@ -73,6 +74,9 @@ with st.sidebar:
         st.markdown(f"**{group_name}**")
         for icon, title, anchor, _ in sections:
             st.markdown(f"[{icon} {title}](#{anchor})")
+
+if not st.session_state.get("startup_done"):
+    startup_team_dialog()
 
 render_intro()
 

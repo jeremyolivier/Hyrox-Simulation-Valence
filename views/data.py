@@ -138,6 +138,28 @@ def team_selector(suffix: str) -> None:
     )
 
 
+@st.dialog("Suivre une équipe")
+def startup_team_dialog() -> None:
+    st.write(
+        "Choisis une équipe à mettre en avant sur toute l'analyse. "
+        "Tu pourras la changer à tout moment via les sélecteurs."
+    )
+
+    options = ["Aucune", *team_names()]
+    choice = st.selectbox("Équipe", options, key="startup_team_choice")
+
+    left, right = st.columns(2)
+
+    if left.button("Valider", type="primary", width="stretch"):
+        st.session_state["team"] = choice
+        st.session_state["startup_done"] = True
+        st.rerun()
+
+    if right.button("Plus tard", width="stretch"):
+        st.session_state["startup_done"] = True
+        st.rerun()
+
+
 def format_seconds(total: int) -> str:
     hours, remainder = divmod(int(total), 3600)
     minutes, seconds = divmod(remainder, 60)

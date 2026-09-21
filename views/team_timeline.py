@@ -191,7 +191,7 @@ def render_team_timeline() -> None:
 
     st.markdown(f"#### Splits de **{team_name}**")
     st.caption(
-        f"Temps total : **{format_seconds(total)}** · course en gris, "
+        f"Temps total : **{team.final_time}** · course en gris, "
         "ateliers en couleur · survole un segment pour le détail."
     )
 

@@ -95,7 +95,7 @@ def render_stage_analysis() -> None:
     stage = st.select_slider(
         "Étape",
         options=list(range(1, len(labels) + 1)),
-        value=len(labels),
+        value=1,
         format_func=lambda index: f"{index}. {labels[index - 1]}",
     )
 
