@@ -1,0 +1,29 @@
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Caches Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches d'outils
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.ty_cache/
+
+# Remarque : data/results.json est committé volontairement (Streamlit en a
+# besoin au déploiement, il n'y a pas de fetch réseau côté application).
+
+# Logs runtime
+*.log
+
+# Skills / outillage agents
+.agents/
+.claude/skills/
+
+# OS
+.DS_Store
+Thumbs.db
