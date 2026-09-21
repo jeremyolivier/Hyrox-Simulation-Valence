@@ -1,6 +1,6 @@
 import streamlit as st
 
-from views.data import startup_team_dialog
+from views.data import restore_team_from_url, startup_team_dialog
 from views.distribution import render_distribution
 from views.intro import render_intro
 from views.ranking import render_ranking
@@ -75,7 +75,10 @@ with st.sidebar:
         for icon, title, anchor, _ in sections:
             st.markdown(f"[{icon} {title}](#{anchor})")
 
-if not st.session_state.get("startup_done"):
+restore_team_from_url()
+
+_has_team = st.session_state.get("team", "Aucune") not in (None, "Aucune")
+if not st.session_state.get("startup_done") and not _has_team:
     startup_team_dialog()
 
 render_intro()

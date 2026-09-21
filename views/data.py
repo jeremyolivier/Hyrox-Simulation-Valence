@@ -115,8 +115,26 @@ def highlighted_team() -> str | None:
     return None if not team or team == "Aucune" else team
 
 
+def set_team(team: str | None) -> None:
+    if team and team != "Aucune":
+        st.session_state["team"] = team
+        st.query_params["team"] = team
+    else:
+        st.session_state["team"] = "Aucune"
+        st.query_params.pop("team", None)
+
+
+def restore_team_from_url() -> None:
+    if "team" in st.session_state:
+        return
+
+    url_team = st.query_params.get("team")
+    if url_team and url_team in team_names():
+        st.session_state["team"] = url_team
+
+
 def _sync_team(key: str) -> None:
-    st.session_state["team"] = st.session_state[key]
+    set_team(st.session_state[key])
 
 
 def team_selector(suffix: str) -> None:
@@ -151,7 +169,7 @@ def startup_team_dialog() -> None:
     left, right = st.columns(2)
 
     if left.button("Valider", type="primary", width="stretch"):
-        st.session_state["team"] = choice
+        set_team(choice)
         st.session_state["startup_done"] = True
         st.rerun()
 
